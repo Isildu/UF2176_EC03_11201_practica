@@ -1,38 +1,25 @@
-const pool = require("../config/db");
+const Curso = require("../models/Curso");
 
-const getCursos = async(req,res)=>{
-
-    const resultado = await pool.query(`
-        SELECT c.*,
-               p.nombre as profesor
-        FROM curso c
-        INNER JOIN profesores p
-        ON c.profesor_id=p.profesor_id
-    `);
-
-    res.json(resultado.rows);
+const getCursos = async (req, res) => {
+    try {
+        const resultado = await Curso.findAll();
+        res.json(resultado.rows);
+    } catch (error) {
+        res.status(500).json({ mensaje: error.message });
+    }
 };
 
-const createCurso = async(req,res)=>{
-
-    const {
-        nombre,
-        horas,
-        profesor_id
-    } = req.body;
-
-    const resultado = await pool.query(
-        `INSERT INTO curso
-         (nombre,horas,profesor_id)
-         VALUES($1,$2,$3)
-         RETURNING *`,
-        [nombre,horas,profesor_id]
-    );
-
-    res.status(201).json(resultado.rows[0]);
+const createCurso = async (req, res) => {
+    try {
+        const { nombre, horas, profesor_id } = req.body;
+        const resultado = await Curso.create(nombre, horas, profesor_id);
+        res.status(201).json(resultado.rows[0]);
+    } catch (error) {
+        res.status(500).json({ mensaje: error.message });
+    }
 };
 
-module.exports={
+module.exports = {
     getCursos,
-    createCurso
+    createCurso,
 };

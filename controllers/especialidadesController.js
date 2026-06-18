@@ -1,18 +1,14 @@
-const pool=require("../config/db");
+const Especialidad = require("../models/Especialidad");
 
-const getEspecialidades=async(req,res)=>{
-
-    const resultado=await pool.query(`
-        SELECT e.*,
-               p.nombre as profesor
-        FROM especialidad e
-        LEFT JOIN profesores p
-        ON e.profesor_id=p.profesor_id
-    `);
-
-    res.json(resultado.rows);
+const getEspecialidades = async (req, res) => {
+    try {
+        const resultado = await Especialidad.findAll();
+        res.json(resultado.rows);
+    } catch (error) {
+        res.status(500).json({ mensaje: error.message });
+    }
 };
 
-module.exports={
-    getEspecialidades
+module.exports = {
+    getEspecialidades,
 };

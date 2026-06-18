@@ -1,11 +1,7 @@
+const jwt = require("jsonwebtoken");
+
 module.exports = (req, res, next) => {
     const authHeader = req.headers.authorization;
-    const configuredToken = process.env.API_TOKEN;
-
-    // If no token is configured, keep requests open to avoid breaking local development.
-    if (!configuredToken) {
-        return next();
-    }
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ mensaje: "Token no proporcionado" });
@@ -13,9 +9,11 @@ module.exports = (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
-    if (token !== configuredToken) {
-        return res.status(401).json({ mensaje: "Token inválido" });
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        req.usuario = payload;
+        return next();
+    } catch (error) {
+        return res.status(401).json({ mensaje: "Token inválido o expirado" });
     }
-
-    return next();
 };
