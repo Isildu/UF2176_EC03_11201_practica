@@ -2,10 +2,8 @@ const router = require("express").Router();
 
 const {
     getProfesores,
-    getProfesor,
-    createProfesor,
-    updateProfesor,
-    deleteProfesor
+    getProfesor
+ 
 } = require("../controllers/profesoresController");
 const authMiddleware = require("../controllers/middlewares/authMiddleware");
 const handleValidation = require("../controllers/middlewares/handleValidation");
@@ -13,11 +11,4 @@ const profesorValidator = require("../controllers/middlewares/validators/profeso
 
 router.get("/", authMiddleware, getProfesores);
 router.get("/:id", authMiddleware, getProfesor);
-
-router.post("/", authMiddleware, profesorValidator, handleValidation, createProfesor);
-
-router.put("/:id", authMiddleware, profesorValidator, handleValidation, updateProfesor);
-
-router.delete("/:id", authMiddleware, deleteProfesor);
-
-module.exports = router;
+export default router;

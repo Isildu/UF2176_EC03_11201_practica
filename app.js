@@ -20,7 +20,9 @@ app.use("/api/alumnos", alumnosRoutes);
 app.use("/api/cursos", cursosRoutes);
 app.use("/api/especialidades", especialidadesRoutes);
 app.use("/api/matriculas", matriculasRoutes);
-
+app.use('/health', (req, res) => {
+    res.status(200).json({ message: 'API is healthy' });
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

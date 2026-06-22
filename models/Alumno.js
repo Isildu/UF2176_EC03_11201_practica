@@ -6,10 +6,18 @@ const Alumno = {
 
     create: (nombre, email) =>
         pool.query(
-            `INSERT INTO alumnos (nombre, email)
-             VALUES ($1, $2) RETURNING *`,
+            `INSERT INTO alumnos (nombre, email) VALUES ($1, $2) RETURNING *`,
             [nombre, email]
         ),
+
+    update: (id, nombre, email) =>
+        pool.query(
+            `UPDATE alumnos SET nombre = $1, email = $2 WHERE alumno_id = $3 RETURNING *`,
+            [nombre, email, id]
+        ),
+
+    remove: (id) =>
+        pool.query("DELETE FROM alumnos WHERE alumno_id = $1", [id]),
 };
 
 module.exports = Alumno;
