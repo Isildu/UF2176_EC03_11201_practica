@@ -7,6 +7,6 @@ router.get('/profesores/por-edad', consultasController.profesoresPorEdad);
 
 // Aquí irán el resto de endpoints
 router.get('/profesores/rango', consultasController.profesoresPorRangoEdad);
-// router.get('/cursos/top-matriculados', consultasController.cursosTopMatriculados);
-
+router.get('/cursos/top-matriculados', consultasController.cursosTopMatriculados);
+router.get('/matriculas/alumno-curso', consultasController.matriculasAlumnoCurso);
 module.exports = router;
