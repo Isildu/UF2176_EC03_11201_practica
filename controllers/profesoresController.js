@@ -19,6 +19,7 @@ const getProfesor = async (req, res) => {
     }
 };
 
+
 const createProfesor = async (req, res) => {
     try {
         const { nombre, edad, especialidad_id } = req.body;
