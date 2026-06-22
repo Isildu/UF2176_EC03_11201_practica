@@ -29,12 +29,12 @@ const profesoresPorEdad = async (req, res) => {
 const profesoresPorRangoEdad = async (req, res) => {
     try {
         const { min, max } = req.query;
-        
+
         if (!min || !max) {
             return res.status(400).json({ mensaje: 'min y max son requeridos' });
         }
-        
-        
+
+
         const resultado = await pool.query(
             'SELECT * FROM profesores WHERE edad >= $1 AND edad <= $2',
             [min, max]
@@ -44,7 +44,7 @@ const profesoresPorRangoEdad = async (req, res) => {
                 mensaje: `No se encontraron profesores con edades entre ${min} y ${max}`
             });
         }
-        
+
         res.json(resultado.rows);
     } catch (error) {
         res.status(500).json({ mensaje: error.message });
@@ -72,7 +72,7 @@ const cursosTopMatriculados = async (req, res) => {
                 ) AS conteos
             )
         `);
-        
+
         res.json(resultado.rows);
     } catch (error) {
         res.status(500).json({ mensaje: error.message });
@@ -89,7 +89,72 @@ const matriculasAlumnoCurso = async (req, res) => {
             INNER JOIN alumnos a ON m.alumno_id = a.alumno_id
             INNER JOIN curso c ON m.curso_id = c.curso_id
         `);
+
+        res.json(resultado.rows);
+    } catch (error) {
+        res.status(500).json({ mensaje: error.message });
+    }
+};
+// 5. Consulta con JOIN de 3 tablas: Profesor, Curso y Especialidad
+const profesoresCursoEspecialidad = async (req, res) => {
+    try {
+        const resultado = await pool.query(`
+            SELECT 
+                p.nombre AS profesor_nombre,
+                c.nombre AS curso_nombre,
+                e.nombre AS especialidad_nombre
+            FROM profesores p
+            INNER JOIN curso c ON p.profesor_id = c.profesor_id
+            INNER JOIN especialidad e ON p.especialidad_id = e.especialidad_id
+        `);
+
+        res.json(resultado.rows);
+    } catch (error) {
+        res.status(500).json({ mensaje: error.message });
+    }
+};
+// 6. Consulta con GROUP BY: Total de alumnos por curso
+const totalMatriculasPorCurso = async (req, res) => {
+    try {
+        const resultado = await pool.query(`
+            SELECT 
+                c.nombre AS curso,
+                COUNT(m.matricula_id) AS total_alumnos
+            FROM curso c
+            LEFT JOIN matriculas m ON c.curso_id = m.curso_id
+            GROUP BY c.curso_id, c.nombre
+            ORDER BY total_alumnos DESC;
+        `);
         
+        res.json(resultado.rows);
+    } catch (error) {
+        res.status(500).json({ mensaje: error.message });
+    }
+};
+// 7. Consulta con GROUP BY y HAVING: Cursos con mínimo de matrículas
+const cursosConMinimoMatriculas = async (req, res) => {
+    try {
+        const { min } = req.query;
+        
+        if (!min) {
+            return res.status(400).json({ mensaje: 'min es requerido' });
+        }
+        
+        const resultado = await pool.query(`
+            SELECT 
+                c.nombre AS curso,
+                COUNT(m.matricula_id) AS total_alumnos
+            FROM curso c
+            LEFT JOIN matriculas m ON c.curso_id = m.curso_id
+            GROUP BY c.curso_id, c.nombre
+            HAVING COUNT(m.matricula_id) >= $1
+            ORDER BY total_alumnos DESC;
+        `, [min]);
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({
+                mensaje: `No se encontraron cursos con al menos ${min} matrículas`
+            });
+        }
         res.json(resultado.rows);
     } catch (error) {
         res.status(500).json({ mensaje: error.message });
@@ -99,5 +164,8 @@ module.exports = {
     profesoresPorEdad,
     profesoresPorRangoEdad,
     cursosTopMatriculados,
-    matriculasAlumnoCurso
+    matriculasAlumnoCurso,
+    profesoresCursoEspecialidad,
+    totalMatriculasPorCurso,
+    cursosConMinimoMatriculas
 };
